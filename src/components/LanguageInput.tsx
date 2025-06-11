@@ -1,14 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Lightbulb } from 'lucide-react';
+import { Loader2, Lightbulb, User, Github } from 'lucide-react';
 import { languageDetectionService } from '../services/languageDetectionService';
 
 interface LanguageInputProps {
-  onStart: (languageCode: string) => void;
+  onStart: (data: { languageCode: string; username?: string }) => void;
   loading: boolean;
 }
 
@@ -29,6 +30,7 @@ const popularLanguages = [
 
 const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
   const [languageCode, setLanguageCode] = useState('');
+  const [username, setUsername] = useState('');
   const [detectedLanguage, setDetectedLanguage] = useState('');
 
   useEffect(() => {
@@ -42,7 +44,10 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (languageCode.trim()) {
-      onStart(languageCode.trim().toLowerCase());
+      onStart({ 
+        languageCode: languageCode.trim().toLowerCase(),
+        username: username.trim() || undefined
+      });
     }
   };
 
@@ -52,6 +57,12 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
 
   const useDetectedLanguage = () => {
     setLanguageCode(detectedLanguage);
+  };
+
+  const validateUsername = (value: string) => {
+    if (!value.trim()) return true; // Optional field
+    // Basic validation for GitHub/Telegram username
+    return /^[a-zA-Z0-9_-]+$/.test(value.trim());
   };
 
   return (
@@ -95,6 +106,30 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
         </p>
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="username" className="flex items-center gap-2">
+          <User className="w-4 h-4" />
+          GitHub/Telegram Username (Optional)
+        </Label>
+        <Input
+          id="username"
+          type="text"
+          placeholder="e.g., your_username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          disabled={loading}
+          className={!validateUsername(username) ? "border-red-500" : ""}
+        />
+        {username && !validateUsername(username) && (
+          <p className="text-xs text-red-500">
+            Username can only contain letters, numbers, hyphens, and underscores
+          </p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Optional: Your GitHub or Telegram username for attribution
+        </p>
+      </div>
+
       <div className="space-y-3">
         <p className="text-sm font-medium text-center">Popular languages:</p>
         <div className="grid grid-cols-2 gap-2">
@@ -115,7 +150,11 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
         </div>
       </div>
 
-      <Button type="submit" disabled={!languageCode.trim() || loading} className="w-full">
+      <Button 
+        type="submit" 
+        disabled={!languageCode.trim() || loading || !validateUsername(username)} 
+        className="w-full"
+      >
         {loading ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />

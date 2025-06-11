@@ -7,6 +7,7 @@ import { TranslationData } from '@/types';
 interface UseTranslationFlowProps {
   setLoading: (loading: boolean) => void;
   setUserLang: (lang: string) => void;
+  setUsername: (username: string | undefined) => void;
   setYamlData: (data: any) => void;
   setAllKeys: (keys: string[]) => void;
   setTranslations: (translations: any) => void;
@@ -18,6 +19,7 @@ interface UseTranslationFlowProps {
 export const useTranslationFlow = ({
   setLoading,
   setUserLang,
+  setUsername,
   setYamlData,
   setAllKeys,
   setTranslations,
@@ -27,23 +29,23 @@ export const useTranslationFlow = ({
 }: UseTranslationFlowProps) => {
   const { toast } = useToast();
 
-  const handleStartTranslation = async (languageCode: string) => {
+  const handleStartTranslation = async (data: { languageCode: string; username?: string }) => {
     setLoading(true);
 
     try {
       // Check for existing translations first - both recent and older saved progress
-      const recentData = storageService.loadRecentTranslations(languageCode);
-      const savedData = storageService.loadTranslations(languageCode);
+      const recentData = storageService.loadRecentTranslations(data.languageCode);
+      const savedData = storageService.loadTranslations(data.languageCode);
       
       if (recentData && Object.keys(recentData.translations).length > 0) {
         // Always show dialog for any existing progress
-        return { showDialog: true, savedData: recentData, languageCode };
+        return { showDialog: true, savedData: recentData, languageCode: data.languageCode, username: data.username };
       } else if (savedData && Object.keys(savedData.translations).length > 0) {
         // Show dialog for older saved progress
-        return { showDialog: true, savedData, languageCode };
+        return { showDialog: true, savedData, languageCode: data.languageCode, username: data.username };
       } else {
         // No existing translations, start fresh
-        await proceedWithTranslation(languageCode);
+        await proceedWithTranslation(data.languageCode, undefined, data.username);
         return { showDialog: false };
       }
     } catch (error) {
@@ -57,8 +59,9 @@ export const useTranslationFlow = ({
     }
   };
 
-  const proceedWithTranslation = async (languageCode: string, existingData?: TranslationData) => {
+  const proceedWithTranslation = async (languageCode: string, existingData?: TranslationData, userUsername?: string) => {
     setUserLang(languageCode);
+    setUsername(userUsername);
 
     try {
       // Load default English YAML data

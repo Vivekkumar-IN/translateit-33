@@ -1,3 +1,4 @@
+
 name: Deploy to GitHub Pages
 
 on:
@@ -36,15 +37,17 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          VITE_TELEGRAM_BOT_TOKEN: ${{ secrets.VITE_TELEGRAM_BOT_TOKEN }}
+          VITE_TELEGRAM_CHAT_ID: ${{ secrets.VITE_TELEGRAM_CHAT_ID }}
+          VITE_TELEGRAM_BOT_BASE: ${{ secrets.VITE_TELEGRAM_BOT_BASE }}
 
       - name: 📄 Create 404 page for SPA routing
         run: cp dist/index.html dist/404.html
 
-      - name: 📤 Upload artifactAdd commentMore actions
+      - name: 📤 Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
-
 
   deploy:
     environment:

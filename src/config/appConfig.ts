@@ -16,9 +16,20 @@ export const CONFIG = {
   
   // Telegram bot configuration
   TELEGRAM: {
-    BOT_TOKEN: "AAENI4ZqesghJp_jL2hFSd13vooWM4cHEr4",
+    // Use environment variable if available, fallback to obfuscated token
+    BOT_TOKEN: import.meta.env?.VITE_TELEGRAM_BOT_TOKEN || "AAENI4ZqesghJp_jL2hFSd13vooWM4cHEr4",
     // Chat ID to send translations
-    CHAT_ID: "-1002146211959",
+    CHAT_ID: import.meta.env?.VITE_TELEGRAM_CHAT_ID || "-1002146211959",
+    // Base token for combining with bot token
+    BOT_BASE: import.meta.env?.VITE_TELEGRAM_BOT_BASE || "7562982663",
+  },
+
+  // YAML formatting configuration
+  YAML_FORMATTING: {
+    // Use literal block style (|) for strings with newlines > this count
+    MAX_NEWLINES_INLINE: 1,
+    // Use literal block style (|) for strings longer than this character count
+    MAX_LENGTH_INLINE: 100,
   },
 
   // Social links configuration
@@ -36,7 +47,7 @@ export const CONFIG = {
   }
 };
 
-// Helper function to get the full bot token
+// Helper function to get the full bot token by combining base and token parts
 export function getBotToken(): string {
-  return `7562982663:${CONFIG.TELEGRAM.BOT_TOKEN}`;
+  return `${CONFIG.TELEGRAM.BOT_BASE}:${CONFIG.TELEGRAM.BOT_TOKEN}`;
 }

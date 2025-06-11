@@ -10,6 +10,7 @@ export const useTranslationState = () => {
   const [translations, setTranslations] = useState<{ [key: string]: string }>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userLang, setUserLang] = useState('');
+  const [username, setUsername] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [existingTranslations, setExistingTranslations] = useState<YamlData>({});
   const [existingTranslationPercentage, setExistingTranslationPercentage] = useState(0);
@@ -46,6 +47,8 @@ export const useTranslationState = () => {
     setCurrentIndex,
     userLang,
     setUserLang,
+    username,
+    setUsername,
     loading,
     setLoading,
     existingTranslations,

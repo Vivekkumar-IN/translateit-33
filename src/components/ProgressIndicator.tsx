@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Clock, CheckCircle, Save, Timer } from 'lucide-react';
+import { languageDetectionService } from '@/services/languageDetectionService';
 
 interface ProgressIndicatorProps {
   translated: number;
@@ -25,6 +26,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
   const percentage = Math.round((translated / total) * 100);
   const remaining = total - translated;
   const estimated = remaining * 1.5; // Estimate 1.5 minutes per translation
+  const languageName = languageDetectionService.getLanguageName(language);
 
   const formatTime = (minutes: number) => {
     if (minutes < 1) return '< 1m';
@@ -52,7 +54,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">Translation Progress</h3>
-            <Badge variant="secondary">{language.toUpperCase()}</Badge>
+            <Badge variant="secondary">{languageName} ({language.toUpperCase()})</Badge>
           </div>
           
           <div className="space-y-2">

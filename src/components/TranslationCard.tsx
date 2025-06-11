@@ -57,18 +57,6 @@ const TranslationCard: React.FC<TranslationCardProps> = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.ctrlKey || e.metaKey) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleSave();
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        if (canGoPrevious) onPrevious();
-      }
-    }
-  };
-
   const getTranslationLabel = () => {
     return existingTranslation && !currentTranslation ? "Existing Translation:" : "Your translation:";
   };
@@ -78,6 +66,16 @@ const TranslationCard: React.FC<TranslationCardProps> = ({
       return "Edit the existing translation or keep it as is...";
     }
     return "Enter your translation here...";
+  };
+
+  // Format text for display, preserving newlines
+  const formatTextForDisplay = (text: string) => {
+    return text.split('\n').map((line, index) => (
+      <span key={index}>
+        {line}
+        {index < text.split('\n').length - 1 && <br />}
+      </span>
+    ));
   };
 
   return (
@@ -98,7 +96,9 @@ const TranslationCard: React.FC<TranslationCardProps> = ({
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-muted-foreground">Original (English):</h4>
           <div className="bg-muted p-3 rounded-md relative">
-            <p className="text-sm italic break-words pr-8">{originalText}</p>
+            <p className="text-sm italic break-words pr-8 whitespace-pre-wrap">
+              {formatTextForDisplay(originalText)}
+            </p>
             <Button
               variant="ghost"
               size="sm"
@@ -121,16 +121,12 @@ const TranslationCard: React.FC<TranslationCardProps> = ({
             value={translation}
             onChange={(e) => setTranslation(e.target.value)}
             placeholder={getTranslationPlaceholder()}
-            className="min-h-[80px] sm:min-h-[100px] resize-none text-sm"
-            onKeyDown={handleKeyDown}
+            className="min-h-[80px] sm:min-h-[100px] resize-none text-sm whitespace-pre-wrap"
             autoFocus
           />
-          <p className="text-xs text-muted-foreground">
-            Tip: Use Ctrl+Enter to save, Ctrl+← to go back
-          </p>
         </div>
 
-        {/* Action buttons - with pointer cursor for Previous and Save */}
+        {/* Action buttons */}
         <div className="flex flex-col gap-3">
           <div className="flex gap-2">
             <Button

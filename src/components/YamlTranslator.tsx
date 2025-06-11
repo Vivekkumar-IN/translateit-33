@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Download, Send, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useTranslationState } from '@/hooks/useTranslationState';
 import { useBackButtonHandler } from '@/hooks/useBackButtonHandler';
 import { useTranslationFlow } from '@/hooks/useTranslationFlow';
@@ -36,6 +35,8 @@ const YamlTranslator = () => {
     setCurrentIndex,
     userLang,
     setUserLang,
+    username,
+    setUsername,
     loading,
     setLoading,
     existingTranslations,
@@ -56,6 +57,7 @@ const YamlTranslator = () => {
   } = useTranslationFlow({
     setLoading,
     setUserLang,
+    setUsername,
     setYamlData,
     setAllKeys,
     setTranslations,
@@ -76,43 +78,16 @@ const YamlTranslator = () => {
   const { toast } = useToast();
 
   // Handle URL parameters and check for saved translations
-  const handleStartTranslationWithDialog = async (languageCode: string) => {
-    const result = await handleStartTranslation(languageCode);
+  const handleStartTranslationWithDialog = async (data: { languageCode: string; username?: string }) => {
+    const result = await handleStartTranslation(data);
     
     if (result.showDialog) {
       setPendingLanguageCode(result.languageCode);
       setSavedTranslationData(result.savedData);
+      setUsername(result.username);
       setShowContinueDialog(true);
     }
   };
-
-  // Add keyboard shortcuts
-  useKeyboardShortcuts({
-    onSave: () => {
-      if (step === 'translating' && currentKey) {
-        const textarea = document.querySelector('textarea');
-        const translation = textarea?.value || translations[currentKey] || existingTranslations[currentKey] || yamlData[currentKey];
-        handleSaveTranslation(translation);
-      }
-    },
-    onNext: () => {
-      if (step === 'translating') {
-        handleNext();
-      }
-    },
-    onPrevious: () => {
-      if (step === 'translating') {
-        handlePrevious();
-      }
-    },
-    onSkip: () => {
-      if (step === 'translating' && currentKey) {
-        const defaultValue = existingTranslations[currentKey] || yamlData[currentKey];
-        handleSaveTranslation(defaultValue);
-      }
-    },
-    disabled: step !== 'translating'
-  });
 
   // Fixed search to only search by key and calculate filtered keys correctly
   const filteredKeys = allKeys.filter(key => {
@@ -141,7 +116,7 @@ const YamlTranslator = () => {
   const handleContinueTranslation = () => {
     setShowContinueDialog(false);
     if (savedTranslationData) {
-      proceedWithTranslation(pendingLanguageCode, savedTranslationData);
+      proceedWithTranslation(pendingLanguageCode, savedTranslationData, username);
       toast({
         title: "Previous translations loaded successfully!",
         description: `Loaded ${Object.keys(savedTranslationData.translations).length} previous translations`,
@@ -152,7 +127,7 @@ const YamlTranslator = () => {
   const handleRestartTranslation = () => {
     setShowContinueDialog(false);
     storageService.clearTranslations(pendingLanguageCode);
-    proceedWithTranslation(pendingLanguageCode);
+    proceedWithTranslation(pendingLanguageCode, undefined, username);
   };
 
   const handleCancelDialog = () => {
@@ -214,7 +189,7 @@ const YamlTranslator = () => {
   const handleSendToTelegram = async () => {
     setLoading(true);
     try {
-      await telegramService.sendTranslations(translations, userLang);
+      await telegramService.sendTranslations(translations, userLang, username);
       toast({
         title: "Sent to Telegram!",
         description: "Your translations have been sent successfully",
