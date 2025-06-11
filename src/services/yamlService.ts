@@ -7,8 +7,8 @@ interface YamlData {
 }
 
 class YamlService {
-  // private readonly BASE_URL = "https://raw.githubusercontent.com/TheTeamVivek/YukkiMusic/master/strings/langs";
-  private readonly BASE_URL = "https://raw.githubusercontent.com/ViYomX/translateit/main/.github";
+  private readonly BASE_URL = "https://raw.githubusercontent.com/TheTeamVivek/YukkiMusic/master/strings/langs";
+  // private readonly BASE_URL = "https://raw.githubusercontent.com/ViYomX/translateit/main/.github";
 
   async loadYamlFromGitHub(languageCode: string = 'en'): Promise<YamlData> {
     const yamlUrl = `${this.BASE_URL}/${languageCode}.yml`;
