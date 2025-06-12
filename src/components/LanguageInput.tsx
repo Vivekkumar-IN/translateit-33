@@ -7,13 +7,14 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { languageService } from '../services/languageService';
+import languageData from '@/data/iso639-1.json';
 
 interface LanguageInputProps {
   onStart: (data: { languageCode: string }) => void;
   loading: boolean;
 }
 
-const popularLanguages = [
+/*const popularLanguages = [
   { code: 'hi', name: 'Hindi' },
   { code: 'es', name: 'Spanish' },
   { code: 'fr', name: 'French' },
@@ -26,7 +27,14 @@ const popularLanguages = [
   { code: 'zh', name: 'Chinese' },
   { code: 'ar', name: 'Arabic' },
   { code: 'tr', name: 'Turkish' }
-];
+];*/
+
+
+const popularLanguages = Object.entries(languageData).map(([code, name]) => ({
+  code,
+  name,
+}));
+
 
 const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
   const [languageCode, setLanguageCode] = useState('');
