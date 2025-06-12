@@ -11,7 +11,15 @@ export const CONFIG = {
   // Deployment configuration
   DEPLOYMENT: {
     // Base path for the application (used in vite.config.ts)
+    // For GitHub Pages: "/translateit/"
+    // For local development or root deployment: "/"
     BASE_PATH: "/translateit/",
+  },
+  
+  // GitHub Repository Links
+  GITHUB: {
+    SOURCE_REPO: "https://github.com/TheTeamVivek/YukkiMusic",
+    TRANSLATOR_REPO: "https://github.com/Vivekkumar-IN/translateit"
   },
   
   // Telegram bot configuration
