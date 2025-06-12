@@ -124,7 +124,7 @@ export const isLanguageTranslated = (code: string): boolean => {{
           NODE_ENV: production
           VITE_TELEGRAM_BOT_TOKEN: ${{ secrets.VITE_TELEGRAM_BOT_TOKEN }}
           VITE_TELEGRAM_CHAT_ID: ${{ secrets.VITE_TELEGRAM_CHAT_ID }}
-          VITE_BASE_PATH: "/"
+          VITE_BASE_PATH: "/translateit/"
 
       - name: 📄 Create 404 page for SPA routing
         run: |
