@@ -106,7 +106,7 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
       </div>
 
       <div className="space-y-3">
-        <p className="text-sm font-medium text-left">Available languages:</p>
+        <p className="text-sm font-medium text-centre">Available languages:</p>
         <div className="grid grid-cols-2 gap-2">
           {popularLanguages.map((lang) => (
             <Badge
