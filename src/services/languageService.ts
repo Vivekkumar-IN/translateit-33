@@ -1,11 +1,12 @@
+import languageData from '@/data/iso639-1.json';
+
 
 class LanguageService {
   private languageNames: Record<string, string> = {};
   
   constructor() {
     try {
-      // Import the simplified ISO 639-1 data
-      this.languageNames = require('@/data/iso639-1.json');
+      this.languageNames = languageData;
     } catch (error) {
       console.warn('Failed to load ISO language data');
       // Provide a minimal fallback for critical languages
