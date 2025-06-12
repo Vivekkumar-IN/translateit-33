@@ -1,5 +1,25 @@
 
 import languageData from '@/data/iso639-1.json';
+import { TRANSLATED_LANGUAGES, getTranslatedLanguages, isLanguageTranslated } from '@/data/translatedLanguages';
+
+// Popular languages list (constant 15 languages)
+const POPULAR_LANGUAGE_CODES = [
+  'es', // Spanish
+  'fr', // French
+  'de', // German
+  'it', // Italian
+  'pt', // Portuguese
+  'ru', // Russian
+  'ja', // Japanese
+  'ko', // Korean
+  'zh', // Chinese
+  'nl', // Dutch
+  'pl', // Polish
+  'sv', // Swedish
+  'da', // Danish
+  'no', // Norwegian
+  'fi'  // Finnish
+];
 
 class LanguageService {
   private languageNames: Record<string, string> = {};
@@ -61,42 +81,52 @@ class LanguageService {
     };
   }
 
-  // Dynamically get translated languages from available JSON files
-  async getTranslatedLanguages(): Promise<string[]> {
-    const translatedLanguages: string[] = [];
-    
-    // Try to import all known language files to check which ones exist
-    const allLanguageCodes = Object.keys(this.languageNames);
-    
-    for (const code of allLanguageCodes) {
-      try {
-        await import(`@/data/langs/${code}.json`);
-        translatedLanguages.push(code);
-      } catch (error) {
-        // File doesn't exist, skip
-      }
-    }
-    
-    return translatedLanguages;
+  // Fast synchronous method using the generated file
+  getTranslatedLanguages(): string[] {
+    return getTranslatedLanguages();
   }
 
-  async isLanguageTranslated(code: string): Promise<boolean> {
-    const translatedLanguages = await this.getTranslatedLanguages();
-    return translatedLanguages.includes(code.toLowerCase());
+  isLanguageTranslated(code: string): boolean {
+    return isLanguageTranslated(code);
   }
 
-  async getUntranslatedLanguages(): Promise<{ code: string; name: string }[]> {
-    const translatedLanguages = await this.getTranslatedLanguages();
+  getTranslatedLanguageDetails(): { code: string; name: string }[] {
+    const translatedLanguages = this.getTranslatedLanguages();
+    const allLanguages = this.getAllSupportedLanguages();
+    
+    return allLanguages.filter(lang => translatedLanguages.includes(lang.code));
+  }
+
+  getUntranslatedLanguages(): { code: string; name: string }[] {
+    const translatedLanguages = this.getTranslatedLanguages();
     const allLanguages = this.getAllSupportedLanguages();
     
     return allLanguages.filter(lang => !translatedLanguages.includes(lang.code));
   }
 
-  async getTranslatedLanguageDetails(): Promise<{ code: string; name: string }[]> {
-    const translatedLanguages = await this.getTranslatedLanguages();
-    const allLanguages = this.getAllSupportedLanguages();
+  // Get popular languages excluding already translated ones
+  getPopularUntranslatedLanguages(): { code: string; name: string }[] {
+    const translatedLanguages = this.getTranslatedLanguages();
+    const popularLanguages = POPULAR_LANGUAGE_CODES
+      .filter(code => !translatedLanguages.includes(code))
+      .map(code => ({
+        code,
+        name: this.getLanguageName(code)
+      }))
+      .filter(lang => this.isValidLanguageCode(lang.code));
     
-    return allLanguages.filter(lang => translatedLanguages.includes(lang.code));
+    return popularLanguages;
+  }
+
+  // Get all popular languages (including translated ones, but marked)
+  getAllPopularLanguages(): { code: string; name: string; isTranslated: boolean }[] {
+    return POPULAR_LANGUAGE_CODES
+      .map(code => ({
+        code,
+        name: this.getLanguageName(code),
+        isTranslated: this.isLanguageTranslated(code)
+      }))
+      .filter(lang => this.isValidLanguageCode(lang.code));
   }
 }
 

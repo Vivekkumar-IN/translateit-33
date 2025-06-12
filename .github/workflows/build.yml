@@ -1,3 +1,4 @@
+
 name:  Update and deploy
 
 on:
@@ -51,6 +52,7 @@ jobs:
               data = json.load(f)
 
           os.makedirs("src/data/langs", exist_ok=True)
+          translated_languages = []
 
           for key in data:
               url = f"https://raw.githubusercontent.com/TheTeamVivek/YukkiMusic/master/strings/langs/{key}.yml"
@@ -60,6 +62,7 @@ jobs:
                       yml_content = yaml.safe_load(res.text)
                       with open(f"src/data/langs/{key}.json", "w", encoding="utf-8") as jf:
                           json.dump(yml_content, jf, indent=4, ensure_ascii=False)
+                      translated_languages.append(key)
                       print(f"Saved {key}.json")
                   except Exception as e:
                       print(f"Error in {key}.yml: {e}")
@@ -67,12 +70,32 @@ jobs:
               else:
                   print(f"{key}.yml not found, skipping.")
 
+          # Generate TSX file with translated languages
+          tsx_content = f"""// Auto-generated file - DO NOT EDIT MANUALLY
+// This file is generated during the build process
+
+export const TRANSLATED_LANGUAGES: string[] = {json.dumps(sorted(translated_languages), indent=2)};
+
+export const getTranslatedLanguages = (): string[] => {{
+  return TRANSLATED_LANGUAGES;
+}};
+
+export const isLanguageTranslated = (code: string): boolean => {{
+  return TRANSLATED_LANGUAGES.includes(code.toLowerCase());
+}};
+"""
+
+          with open("src/data/translatedLanguages.tsx", "w", encoding="utf-8") as tsx_file:
+              tsx_file.write(tsx_content)
+          
+          print(f"Generated translatedLanguages.tsx with {len(translated_languages)} languages")
+
         shell: python
 
       - name: ✅ Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update language JSONs"
+          commit_message: "Update language JSONs and translated languages list"
           commit_options: "--no-verify"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
@@ -101,7 +124,7 @@ jobs:
           NODE_ENV: production
           VITE_TELEGRAM_BOT_TOKEN: ${{ secrets.VITE_TELEGRAM_BOT_TOKEN }}
           VITE_TELEGRAM_CHAT_ID: ${{ secrets.VITE_TELEGRAM_CHAT_ID }}
-          VITE_BASE_PATH: "/translateit/"
+          VITE_BASE_PATH: "/"
 
       - name: 📄 Create 404 page for SPA routing
         run: |
