@@ -224,17 +224,13 @@ const YamlTranslator = () => {
       <LanguageSelection
         loading={loading}
         showContinueDialog={showContinueDialog}
-        showExitDialog={showExitDialog}
         pendingLanguageCode={pendingLanguageCode}
         savedTranslationData={savedTranslationData}
         onStartTranslation={handleStartTranslationWithDialog}
         onContinueTranslation={handleContinueTranslation}
         onRestartTranslation={handleRestartTranslation}
         onCancelDialog={handleCancelDialog}
-        onExitConfirm={handleExitConfirm}
-        onExitCancel={handleExitCancel}
         setShowContinueDialog={setShowContinueDialog}
-        setShowExitDialog={setShowExitDialog}
       />
     );
   }

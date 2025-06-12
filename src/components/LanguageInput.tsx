@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, CheckCircle, AlertTriangle, Globe, Languages } from 'lucide-react';
 import { languageService } from '../services/languageService';
+import { translatedLanguagesService } from '../services/translatedLanguagesService';
 import languageData from '@/data/iso639-1.json';
 
 interface LanguageInputProps {
@@ -14,27 +15,10 @@ interface LanguageInputProps {
   loading: boolean;
 }
 
-/*const popularLanguages = [
-  { code: 'hi', name: 'Hindi' },
-  { code: 'es', name: 'Spanish' },
-  { code: 'fr', name: 'French' },
-  { code: 'de', name: 'German' },
-  { code: 'it', name: 'Italian' },
-  { code: 'pt', name: 'Portuguese' },
-  { code: 'ru', name: 'Russian' },
-  { code: 'ja', name: 'Japanese' },
-  { code: 'ko', name: 'Korean' },
-  { code: 'zh', name: 'Chinese' },
-  { code: 'ar', name: 'Arabic' },
-  { code: 'tr', name: 'Turkish' }
-];*/
-
-
-const popularLanguages = Object.entries(languageData).map(([code, name]) => ({
+const allLanguages = Object.entries(languageData).map(([code, name]) => ({
   code,
   name,
 }));
-
 
 const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
   const [languageCode, setLanguageCode] = useState('');
@@ -42,6 +26,12 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
     isValid: boolean;
     name?: string;
   } | null>(null);
+
+  const translatedLanguages = translatedLanguagesService.getTranslatedLanguageDetails(allLanguages);
+  const untranslatedLanguages = translatedLanguagesService.getUntranslatedLanguages(allLanguages);
+
+  // Show popular untranslated languages (first 12)
+  const popularUntranslatedLanguages = untranslatedLanguages.slice(0, 12);
 
   useEffect(() => {
     if (languageCode.trim()) {
@@ -105,23 +95,72 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
         </p>
       </div>
 
+      {/* Currently Translated Languages */}
       <div className="space-y-3">
-        <p className="text-sm font-medium text-center">Available languages:</p>
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <p className="text-sm font-medium">Currently Translated Languages ({translatedLanguages.length}):</p>
+        </div>
         <div className="grid grid-cols-2 gap-2">
-          {popularLanguages.map((lang) => (
+          {translatedLanguages.map((lang) => (
+            <Badge
+              key={lang.code}
+              variant="secondary"
+              className="justify-center py-2 text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200 border-green-200 dark:border-green-800"
+            >
+              {lang.code.toUpperCase()} - {lang.name.length > 10 ? lang.name.substring(0, 10) + '...' : lang.name}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      {/* Popular Available Languages for Translation */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Languages className="w-4 h-4 text-blue-600" />
+          <p className="text-sm font-medium">Popular Languages Available for Translation:</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {popularUntranslatedLanguages.map((lang) => (
             <Badge
               key={lang.code}
               variant={languageCode === lang.code ? "default" : "outline"}
-              className={`cursor-pointer justify-center py-2 transition-colors ${
+              className={`cursor-pointer justify-center py-2 text-xs transition-colors ${
                 languageCode === lang.code 
-                  ? "bg-primary text-primary-foreground" 
-                  : "hover:bg-accent hover:text-accent-foreground border-border"
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                  : "hover:bg-accent hover:text-accent-foreground border-border dark:hover:bg-accent/50"
               }`}
               onClick={() => handleLanguageSelect(lang.code)}
             >
-              {lang.code.toUpperCase()} - {lang.name}
+              {lang.code.toUpperCase()} - {lang.name.length > 10 ? lang.name.substring(0, 10) + '...' : lang.name}
             </Badge>
           ))}
+        </div>
+      </div>
+
+      {/* All Available Languages */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Globe className="w-4 h-4 text-gray-600" />
+          <p className="text-sm font-medium">All Available Languages (excluding translated):</p>
+        </div>
+        <div className="max-h-32 overflow-y-auto">
+          <div className="grid grid-cols-2 gap-2">
+            {untranslatedLanguages.slice(12).map((lang) => (
+              <Badge
+                key={lang.code}
+                variant={languageCode === lang.code ? "default" : "outline"}
+                className={`cursor-pointer justify-center py-1 text-xs transition-colors ${
+                  languageCode === lang.code 
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                    : "hover:bg-accent hover:text-accent-foreground border-border dark:hover:bg-accent/50"
+                }`}
+                onClick={() => handleLanguageSelect(lang.code)}
+              >
+                {lang.code.toUpperCase()} - {lang.name.length > 8 ? lang.name.substring(0, 8) + '...' : lang.name}
+              </Badge>
+            ))}
+          </div>
         </div>
       </div>
 

@@ -4,39 +4,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Globe } from 'lucide-react';
 import LanguageInput from './LanguageInput';
 import ContinueTranslationDialog from './ContinueTranslationDialog';
-import ExitConfirmationDialog from './ExitConfirmationDialog';
 import { TranslationData } from '@/types';
 
 interface LanguageSelectionProps {
   loading: boolean;
   showContinueDialog: boolean;
-  showExitDialog: boolean;
   pendingLanguageCode: string;
   savedTranslationData: TranslationData | null;
   onStartTranslation: (data: { languageCode: string }) => void;
   onContinueTranslation: () => void;
   onRestartTranslation: () => void;
   onCancelDialog: () => void;
-  onExitConfirm: () => void;
-  onExitCancel: () => void;
   setShowContinueDialog: (show: boolean) => void;
-  setShowExitDialog: (show: boolean) => void;
 }
 
 const LanguageSelection: React.FC<LanguageSelectionProps> = ({
   loading,
   showContinueDialog,
-  showExitDialog,
   pendingLanguageCode,
   savedTranslationData,
   onStartTranslation,
   onContinueTranslation,
   onRestartTranslation,
   onCancelDialog,
-  onExitConfirm,
-  onExitCancel,
-  setShowContinueDialog,
-  setShowExitDialog
+  setShowContinueDialog
 }) => {
   return (
     <>
@@ -67,13 +58,6 @@ const LanguageSelection: React.FC<LanguageSelectionProps> = ({
         onContinue={onContinueTranslation}
         onRestart={onRestartTranslation}
         onCancel={onCancelDialog}
-      />
-
-      <ExitConfirmationDialog
-        open={showExitDialog}
-        onOpenChange={setShowExitDialog}
-        onConfirm={onExitConfirm}
-        onCancel={onExitCancel}
       />
     </>
   );
