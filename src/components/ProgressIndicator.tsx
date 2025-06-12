@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Clock, CheckCircle, Save, Timer, Globe } from 'lucide-react';
 import { languageService } from '@/services/languageService';
+import { CONFIG } from '@/config/appConfig';
 
 interface ProgressIndicatorProps {
   translated: number;
@@ -25,7 +26,8 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
 }) => {
   const percentage = Math.round((translated / total) * 100);
   const remaining = total - translated;
-  const estimated = remaining * 0.5; // Estimate 30 seconds (0.5 minutes) per translation
+  // Use configurable ETA time from config (in seconds), convert to minutes
+  const estimated = remaining * (CONFIG.TRANSLATION.ETA_SECONDS / 60);
   const languageName = languageService.getLanguageName(language);
 
   const formatTime = (minutes: number) => {
@@ -49,15 +51,19 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
   };
 
   return (
-    <Card className="border-l-4 border-l-blue-500 shadow-lg">
+    <Card className="border-l-4 border-l-blue-500 shadow-lg bg-gradient-to-r from-background via-background/95 to-muted/30">
       <CardContent className="pt-4">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-blue-600" />
-              <h3 className="text-sm font-semibold">Translation Progress</h3>
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                <Globe className="w-4 h-4 text-white" />
+              </div>
+              <h3 className="text-sm font-semibold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                Translation Progress
+              </h3>
             </div>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+            <Badge variant="secondary" className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 dark:from-blue-900/30 dark:to-purple-900/30 dark:text-blue-200 border-blue-200 dark:border-blue-800">
               {languageName} ({language.toUpperCase()})
             </Badge>
           </div>
@@ -65,13 +71,13 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{translated} of {total} completed</span>
-              <span className="font-semibold">{percentage}%</span>
+              <span className="font-semibold text-primary">{percentage}%</span>
             </div>
-            <Progress value={percentage} className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-green-500 [&>div]:to-blue-500" />
+            <Progress value={percentage} className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-green-500 [&>div]:via-blue-500 [&>div]:to-purple-500 shadow-inner" />
           </div>
 
           <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="space-y-1 p-2 rounded-lg bg-green-50 dark:bg-green-950/30">
+            <div className="space-y-1 p-3 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800">
               <div className="flex items-center justify-center gap-1">
                 <CheckCircle className="w-3 h-3 text-green-600" />
                 <span className="text-xs font-semibold text-green-700 dark:text-green-300">Done</span>
@@ -79,7 +85,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
               <p className="text-lg font-bold text-green-600">{translated}</p>
             </div>
 
-            <div className="space-y-1 p-2 rounded-lg bg-orange-50 dark:bg-orange-950/30">
+            <div className="space-y-1 p-3 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200 dark:border-orange-800">
               <div className="flex items-center justify-center gap-1">
                 <Clock className="w-3 h-3 text-orange-600" />
                 <span className="text-xs font-semibold text-orange-700 dark:text-orange-300">Left</span>
@@ -87,19 +93,19 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
               <p className="text-lg font-bold text-orange-600">{remaining}</p>
             </div>
 
-            <div className="space-y-1 p-2 rounded-lg bg-blue-50 dark:bg-blue-950/30">
+            <div className="space-y-1 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800">
               <div className="flex items-center justify-center gap-1">
                 <Timer className="w-3 h-3 text-blue-600" />
                 <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">ETA</span>
               </div>
               <p className="text-lg font-bold text-blue-600">
-                {remaining === 0 ? 'Done!' : formatTime(estimated)}
+                {remaining === 0 ? '🎉 Done!' : formatTime(estimated)}
               </p>
             </div>
           </div>
 
           {autoSaveEnabled && lastSaved && (
-            <div className="flex items-center justify-center gap-2 pt-2 border-t bg-muted/50 rounded-md p-2">
+            <div className="flex items-center justify-center gap-2 pt-2 border-t bg-gradient-to-r from-muted/50 to-muted/30 rounded-md p-3">
               <Save className="w-3 h-3 text-green-600" />
               <span className="text-xs text-muted-foreground">
                 Auto-saved {formatLastSaved(lastSaved)}

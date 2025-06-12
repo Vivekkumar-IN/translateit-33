@@ -47,6 +47,12 @@ export const CONFIG = {
     GITHUB: "https://github.com/TheTeamVivek/YukkiMusic"
   },
 
+  // Translation configuration
+  TRANSLATION: {
+    // Estimated time per translation in seconds (can be overridden by VITE_TRANSLATION_ETA_SECONDS)
+    ETA_SECONDS: parseInt((import.meta as any).env?.VITE_TRANSLATION_ETA_SECONDS || "30"),
+  },
+
   // Translation warning configuration
   TRANSLATION_WARNING: {
     title: "⚠️ IMPORTANT:",
