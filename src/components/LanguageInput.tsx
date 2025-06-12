@@ -64,7 +64,7 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
           placeholder="e.g., hi, fr, es, de..."
           value={languageCode}
           onChange={(e) => setLanguageCode(e.target.value)}
-          className="text-center font-mono text-lg"
+          className="text-center"
           disabled={loading}
         />
         
