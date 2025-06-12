@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Globe } from 'lucide-react';
-import { languageDetectionService } from '@/services/languageDetectionService';
+import { languageService } from '@/services/languageService';
 
 interface ProgressStatsProps {
   translated: number;
@@ -21,7 +21,7 @@ const ProgressStats: React.FC<ProgressStatsProps> = ({
 }) => {
   const percentage = Math.round((translated / total) * 100);
   const remaining = total - translated;
-  const languageName = languageDetectionService.getLanguageName(language);
+  const languageName = languageService.getLanguageName(language);
 
   return (
     <Card className={isComplete ? "border-green-200 bg-green-50 dark:bg-green-950/20" : ""}>
