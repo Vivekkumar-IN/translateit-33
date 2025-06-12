@@ -13,7 +13,8 @@ export const CONFIG = {
     // Base path for the application (used in vite.config.ts)
     // For GitHub Pages: "/translateit/"
     // For local development or root deployment: "/"
-    BASE_PATH: "/translateit/",
+    // Can be overridden by VITE_BASE_PATH environment variable
+    BASE_PATH: (import.meta as any).env?.VITE_BASE_PATH || "/translateit/",
   },
   
   // GitHub Repository Links

@@ -7,18 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, AlertTriangle, Globe, Languages } from 'lucide-react';
 import { languageService } from '../services/languageService';
-import { translatedLanguagesService } from '../services/translatedLanguagesService';
-import languageData from '@/data/iso639-1.json';
 
 interface LanguageInputProps {
   onStart: (data: { languageCode: string }) => void;
   loading: boolean;
 }
-
-const allLanguages = Object.entries(languageData).map(([code, name]) => ({
-  code,
-  name,
-}));
 
 const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
   const [languageCode, setLanguageCode] = useState('');
@@ -26,9 +19,29 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
     isValid: boolean;
     name?: string;
   } | null>(null);
+  const [translatedLanguages, setTranslatedLanguages] = useState<{ code: string; name: string }[]>([]);
+  const [untranslatedLanguages, setUntranslatedLanguages] = useState<{ code: string; name: string }[]>([]);
+  const [isLoadingLanguages, setIsLoadingLanguages] = useState(true);
 
-  const translatedLanguages = translatedLanguagesService.getTranslatedLanguageDetails(allLanguages);
-  const untranslatedLanguages = translatedLanguagesService.getUntranslatedLanguages(allLanguages);
+  // Load translated and untranslated languages dynamically
+  useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const [translated, untranslated] = await Promise.all([
+          languageService.getTranslatedLanguageDetails(),
+          languageService.getUntranslatedLanguages()
+        ]);
+        setTranslatedLanguages(translated);
+        setUntranslatedLanguages(untranslated);
+      } catch (error) {
+        console.error('Error loading languages:', error);
+      } finally {
+        setIsLoadingLanguages(false);
+      }
+    };
+
+    loadLanguages();
+  }, []);
 
   // Show popular untranslated languages (first 12)
   const popularUntranslatedLanguages = untranslatedLanguages.slice(0, 12);
@@ -54,6 +67,15 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
   const handleLanguageSelect = (code: string) => {
     setLanguageCode(code);
   };
+
+  if (isLoadingLanguages) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="w-6 h-6 animate-spin mr-2" />
+        <span>Loading languages...</span>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

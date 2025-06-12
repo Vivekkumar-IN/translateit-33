@@ -30,27 +30,29 @@ Open [http://localhost:5173](http://localhost:5173) to view the application.
 The application supports the following environment variables for secure configuration:
 
 ### Required for Telegram Integration
-- `VITE_TELEGRAM_BOT_BASE` - Base part of your Telegram bot token (e.g., "1234567890")
-- `VITE_TELEGRAM_BOT_TOKEN` - Secret part of your Telegram bot token (after the colon)
+- `VITE_TELEGRAM_BOT_TOKEN` - Your complete Telegram bot token
 - `VITE_TELEGRAM_CHAT_ID` - Telegram chat ID where translations will be sent
+
+### Optional Configuration
+- `VITE_BASE_PATH` - Base path for deployment (default: "/translateit/" for GitHub Pages, use "/" for root deployment)
 
 ### Setting Environment Variables
 
 #### For Local Development
 Create a `.env.local` file in the project root:
 ```env
-VITE_TELEGRAM_BOT_BASE=your_bot_base_token
-VITE_TELEGRAM_BOT_TOKEN=your_bot_secret_token
+VITE_TELEGRAM_BOT_TOKEN=your_complete_bot_token
 VITE_TELEGRAM_CHAT_ID=your_chat_id
+VITE_BASE_PATH=/
 ```
 
 #### For GitHub Actions Deployment
 1. Go to your GitHub repository
 2. Navigate to Settings → Secrets and variables → Actions
 3. Add the following repository secrets:
-   - `VITE_TELEGRAM_BOT_BASE`
    - `VITE_TELEGRAM_BOT_TOKEN`
    - `VITE_TELEGRAM_CHAT_ID`
+   - `VITE_BASE_PATH` (set to "/" for deployment)
 
 #### For Other Hosting Platforms
 - **Vercel**: Add environment variables in the Vercel dashboard
@@ -74,10 +76,14 @@ src/
 ├── services/           # API and external service integrations
 │   ├── yamlService.ts  # YAML file loading/processing
 │   ├── telegramService.ts # Telegram bot integration
+│   ├── languageService.ts # Language detection and management
 │   └── storageService.ts  # Local storage management
 ├── config/             # Application configuration
 │   └── appConfig.ts    # Main configuration file
 ├── types/              # TypeScript type definitions
+├── data/               # Language data
+│   ├── iso639-1.json   # ISO language codes
+│   └── langs/          # Translated language JSON files (auto-updated)
 └── pages/              # Route components
 ```
 
@@ -93,7 +99,9 @@ src/
 2. Configure build settings:
    - Build Command: `npm run build`
    - Output Directory: `dist`
-3. Add environment variables in Vercel dashboard
+3. Add environment variables in Vercel dashboard:
+   - `VITE_BASE_PATH=/`
+   - Other required variables
 4. Deploy automatically on every push
 
 ### Option 3: Netlify
@@ -101,16 +109,22 @@ src/
 2. Build settings:
    - Build command: `npm run build`
    - Publish directory: `dist`
-3. Add environment variables in site settings
+3. Add environment variables in site settings:
+   - `VITE_BASE_PATH=/`
+   - Other required variables
 4. Enable automatic deployments
 
 ### Option 4: GitHub Pages
-1. Add environment variables as GitHub repository secrets
+1. Add environment variables as GitHub repository secrets:
+   - `VITE_BASE_PATH=/` (important for GitHub Pages deployment)
+   - Other required variables
 2. Build the project using GitHub Actions (automatic with provided workflow)
 3. Pages will be deployed automatically
 
 ### Option 5: Self-Hosted
-1. Set environment variables in your hosting environment
+1. Set environment variables in your hosting environment:
+   - `VITE_BASE_PATH=/`
+   - Other required variables
 2. Build the project: `npm run build`
 3. Upload the `dist/` folder contents to your web server
 4. Configure your web server to serve the `index.html` for all routes
@@ -124,11 +138,10 @@ export const CONFIG = {
   APP_NAME: "YukkiMusic",
   
   DEPLOYMENT: {
-    BASE_PATH: "/translateit/",
+    BASE_PATH: import.meta.env.VITE_BASE_PATH || "/translateit/",
   },
   
   TELEGRAM: {
-    BOT_BASE: import.meta.env.VITE_TELEGRAM_BOT_BASE || "fallback_base",
     BOT_TOKEN: import.meta.env.VITE_TELEGRAM_BOT_TOKEN || "fallback_token",
     CHAT_ID: import.meta.env.VITE_TELEGRAM_CHAT_ID || "fallback_chat_id",
   },
@@ -147,13 +160,15 @@ export const CONFIG = {
 
 ## 📱 Features
 
+- **Dynamic Language Detection**: Automatically detects available translations from JSON files
 - **Translation Interface**: Easy-to-use translation cards with original text and translation input
 - **Smart YAML Formatting**: Automatically uses block literal style (|) for multiline content and long strings
-- **Search & Filter**: Advanced search with key-based filtering and translation status
+- **Advanced Search & Filter**: Search with key-based filtering and translation status
 - **Progress Tracking**: Real-time progress indicators and statistics
-- **Auto-save**: Automatic saving of translation progress
+- **Auto-save**: Automatic saving of translation progress with timestamps
 - **Browser Navigation**: Smart back button handling with double-tap exit confirmation
 - **Export Options**: Download YAML files or send to Telegram
+- **Collaboration Features**: Real-time collaboration support
 - **Environment Variable Support**: Secure configuration for production deployments
 
 ## 🛠️ Development
@@ -170,6 +185,13 @@ export const CONFIG = {
 - **State Management**: React hooks and context
 - **YAML Processing**: js-yaml library with intelligent formatting
 - **Icons**: Lucide React
+
+## 🔄 Automated Language Updates
+
+The project includes a GitHub Action that automatically updates language data:
+- **ISO 639-1 codes**: Updated from official sources
+- **Translation files**: Synced from YukkiMusic repository
+- **Runs**: Daily at midnight and on every push to main branch
 
 ## 🔒 Security Notes
 

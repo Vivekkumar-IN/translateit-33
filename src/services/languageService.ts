@@ -1,5 +1,5 @@
-import languageData from '@/data/iso639-1.json';
 
+import languageData from '@/data/iso639-1.json';
 
 class LanguageService {
   private languageNames: Record<string, string> = {};
@@ -59,6 +59,44 @@ class LanguageService {
       isValid,
       name: isValid ? this.getLanguageName(lowerCode) : undefined
     };
+  }
+
+  // Dynamically get translated languages from available JSON files
+  async getTranslatedLanguages(): Promise<string[]> {
+    const translatedLanguages: string[] = [];
+    
+    // Try to import all known language files to check which ones exist
+    const allLanguageCodes = Object.keys(this.languageNames);
+    
+    for (const code of allLanguageCodes) {
+      try {
+        await import(`@/data/langs/${code}.json`);
+        translatedLanguages.push(code);
+      } catch (error) {
+        // File doesn't exist, skip
+      }
+    }
+    
+    return translatedLanguages;
+  }
+
+  async isLanguageTranslated(code: string): Promise<boolean> {
+    const translatedLanguages = await this.getTranslatedLanguages();
+    return translatedLanguages.includes(code.toLowerCase());
+  }
+
+  async getUntranslatedLanguages(): Promise<{ code: string; name: string }[]> {
+    const translatedLanguages = await this.getTranslatedLanguages();
+    const allLanguages = this.getAllSupportedLanguages();
+    
+    return allLanguages.filter(lang => !translatedLanguages.includes(lang.code));
+  }
+
+  async getTranslatedLanguageDetails(): Promise<{ code: string; name: string }[]> {
+    const translatedLanguages = await this.getTranslatedLanguages();
+    const allLanguages = this.getAllSupportedLanguages();
+    
+    return allLanguages.filter(lang => translatedLanguages.includes(lang.code));
   }
 }
 
