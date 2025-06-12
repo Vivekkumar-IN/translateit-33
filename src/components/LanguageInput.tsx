@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Lightbulb, AlertTriangle, CheckCircle } from 'lucide-react';
-import { enhancedLanguageService } from '../services/enhancedLanguageService';
+import { Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { languageService } from '../services/languageService';
 
 interface LanguageInputProps {
   onStart: (data: { languageCode: string }) => void;
@@ -30,24 +30,14 @@ const popularLanguages = [
 
 const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
   const [languageCode, setLanguageCode] = useState('');
-  const [detectedLanguage, setDetectedLanguage] = useState('');
   const [validation, setValidation] = useState<{
     isValid: boolean;
-    isDeprecated: boolean;
-    suggestion?: string;
     name?: string;
   } | null>(null);
 
   useEffect(() => {
-    const detected = enhancedLanguageService.detectUserLanguage();
-    if (detected) {
-      setDetectedLanguage(detected);
-    }
-  }, []);
-
-  useEffect(() => {
     if (languageCode.trim()) {
-      const result = enhancedLanguageService.validateLanguageCode(languageCode.trim());
+      const result = languageService.validateLanguageCode(languageCode.trim());
       setValidation(result);
     } else {
       setValidation(null);
@@ -67,41 +57,8 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
     setLanguageCode(code);
   };
 
-  const useDetectedLanguage = () => {
-    setLanguageCode(detectedLanguage);
-  };
-
-  const useSuggestion = () => {
-    if (validation?.suggestion) {
-      setLanguageCode(validation.suggestion);
-    }
-  };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Auto-detection suggestion */}
-      {detectedLanguage && detectedLanguage !== languageCode && (
-        <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30">
-          <Lightbulb className="w-4 h-4 text-blue-600" />
-          <AlertDescription className="text-sm">
-            <div className="flex items-center justify-between">
-              <span>
-                Detected language: <strong>{enhancedLanguageService.getLanguageName(detectedLanguage)}</strong> ({detectedLanguage})
-              </span>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={useDetectedLanguage}
-                className="ml-2"
-              >
-                Use this
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-
       <div className="space-y-2">
         <Label htmlFor="langCode">Enter your language code (ISO 639-1)</Label>
         <Input
@@ -122,30 +79,6 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
                 <CheckCircle className="w-4 h-4 text-green-600" />
                 <AlertDescription className="text-sm text-green-800 dark:text-green-200">
                   Valid language: <strong>{validation.name}</strong>
-                </AlertDescription>
-              </Alert>
-            ) : validation.isDeprecated ? (
-              <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/30">
-                <AlertTriangle className="w-4 h-4 text-orange-600" />
-                <AlertDescription className="text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-orange-800 dark:text-orange-200">
-                      Deprecated code. {validation.suggestion && (
-                        <>Use <strong>{validation.suggestion}</strong> instead.</>
-                      )}
-                    </span>
-                    {validation.suggestion && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={useSuggestion}
-                        className="ml-2"
-                      >
-                        Use {validation.suggestion}
-                      </Button>
-                    )}
-                  </div>
                 </AlertDescription>
               </Alert>
             ) : (

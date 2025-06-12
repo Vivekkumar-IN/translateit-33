@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { YamlData, TranslationData } from '@/types';
+import { YamlData } from '@/types';
 import { storageService } from '@/services/storageService';
 
 export const useTranslationState = () => {

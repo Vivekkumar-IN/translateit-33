@@ -1,6 +1,7 @@
 
 import { CONFIG } from '@/config/appConfig';
 import { yamlService } from '@/services/yamlService';
+import { languageService } from '@/services/languageService';
 
 class TelegramService {
   private readonly botToken: string;
@@ -13,7 +14,7 @@ class TelegramService {
     this.apiBaseUrl = CONFIG.TELEGRAM.API_BASE;
   }
 
-  async sendTranslations(translations: { [key: string]: string }, languageCode: string, languageName?: string): Promise<void> {
+  async sendTranslations(translations: { [key: string]: string }, languageCode: string): Promise<void> {
     if (!this.botToken || !this.chatId) {
       console.warn('Telegram bot token or chat ID not configured. Skipping send to Telegram.');
       return;
@@ -25,9 +26,8 @@ class TelegramService {
     formData.append('chat_id', this.chatId);
     formData.append('document', new Blob([yamlContent], { type: 'text/plain' }), `${languageCode}.yml`);
     
-    const caption = languageName 
-      ? `YukkiMusic Translation - ${languageName} (${languageCode.toUpperCase()})`
-      : `YukkiMusic Translation - ${languageCode.toUpperCase()}`;
+    const languageName = languageService.getLanguageName(languageCode);
+    const caption = `YukkiMusic Translation - ${languageName} (${languageCode.toUpperCase()})`;
     
     formData.append('caption', caption);
 

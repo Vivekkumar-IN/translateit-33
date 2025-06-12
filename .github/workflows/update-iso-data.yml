@@ -22,15 +22,8 @@ jobs:
         run: |
           mkdir -p src/data/iso
           
-          # Download all ISO 639 data files
-          curl -o src/data/iso/iso-639.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639.json
-          curl -o src/data/iso/iso-639_scope.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_scope.json
-          curl -o src/data/iso/iso-639_type.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_type.json
-          curl -o src/data/iso/iso-639_deprecated.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_deprecated.json
-          curl -o src/data/iso/iso-639_macro.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_macro.json
-          curl -o src/data/iso/iso-639_ref_name.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_ref_name.json
-          curl -o src/data/iso/iso-639_other_names.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_other_names.json
-          curl -o src/data/iso/iso-639_langs.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_langs.json
+          # Download the simplified ISO 639-1 data
+          curl -o src/data/iso/iso-639-1.json https://raw.githubusercontent.com/ihmpavel/all-iso-language-codes/master/data/en/639-1.json
 
       - name: 📝 Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
