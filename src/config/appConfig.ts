@@ -17,9 +17,9 @@ export const CONFIG = {
   // Telegram bot configuration
   TELEGRAM: {
     // Full bot token in format: BOT_ID:BOT_TOKEN
-    BOT_TOKEN: import.meta.env.VITE_TELEGRAM_BOT_TOKEN || "7562982663:AAENI4ZqesghJp_jL2hFSd13vooWM4cHEr4",
+    BOT_TOKEN: (import.meta as any).env?.VITE_TELEGRAM_BOT_TOKEN || "7562982663:AAENI4ZqesghJp_jL2hFSd13vooWM4cHEr4",
     // Chat ID to send translations
-    CHAT_ID: import.meta.env.VITE_TELEGRAM_CHAT_ID || "-1002146211959",
+    CHAT_ID: (import.meta as any).env?.VITE_TELEGRAM_CHAT_ID || "-1002146211959",
     // Telegram API base URL
     API_BASE: "https://api.telegram.org",
   },
