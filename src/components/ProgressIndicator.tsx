@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle, Save, Timer } from 'lucide-react';
+import { Clock, CheckCircle, Save, Timer, Globe } from 'lucide-react';
 import { languageService } from '@/services/languageService';
 
 interface ProgressIndicatorProps {
@@ -24,7 +25,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
 }) => {
   const percentage = Math.round((translated / total) * 100);
   const remaining = total - translated;
-  const estimated = remaining * 1.5; // Estimate 1.5 minutes per translation
+  const estimated = remaining * 0.5; // Estimate 30 seconds (0.5 minutes) per translation
   const languageName = languageService.getLanguageName(language);
 
   const formatTime = (minutes: number) => {
@@ -48,43 +49,48 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
   };
 
   return (
-    <Card className="border-l-4 border-l-blue-500">
+    <Card className="border-l-4 border-l-blue-500 shadow-lg">
       <CardContent className="pt-4">
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium">Translation Progress</h3>
-            <Badge variant="secondary">{languageName} ({language.toUpperCase()})</Badge>
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4 text-blue-600" />
+              <h3 className="text-sm font-semibold">Translation Progress</h3>
+            </div>
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+              {languageName} ({language.toUpperCase()})
+            </Badge>
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{translated} of {total} completed</span>
-              <span>{percentage}%</span>
+              <span className="font-semibold">{percentage}%</span>
             </div>
-            <Progress value={percentage} className="h-2 [&>div]:bg-green-500" />
+            <Progress value={percentage} className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-green-500 [&>div]:to-blue-500" />
           </div>
 
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="space-y-1">
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="space-y-1 p-2 rounded-lg bg-green-50 dark:bg-green-950/30">
               <div className="flex items-center justify-center gap-1">
-                <CheckCircle className="w-3 h-3 text-green-500" />
-                <span className="text-xs font-medium">Done</span>
+                <CheckCircle className="w-3 h-3 text-green-600" />
+                <span className="text-xs font-semibold text-green-700 dark:text-green-300">Done</span>
               </div>
               <p className="text-lg font-bold text-green-600">{translated}</p>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 p-2 rounded-lg bg-orange-50 dark:bg-orange-950/30">
               <div className="flex items-center justify-center gap-1">
-                <Clock className="w-3 h-3 text-orange-500" />
-                <span className="text-xs font-medium">Left</span>
+                <Clock className="w-3 h-3 text-orange-600" />
+                <span className="text-xs font-semibold text-orange-700 dark:text-orange-300">Left</span>
               </div>
               <p className="text-lg font-bold text-orange-600">{remaining}</p>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 p-2 rounded-lg bg-blue-50 dark:bg-blue-950/30">
               <div className="flex items-center justify-center gap-1">
-                <Timer className="w-3 h-3 text-blue-500" />
-                <span className="text-xs font-medium">ETA</span>
+                <Timer className="w-3 h-3 text-blue-600" />
+                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">ETA</span>
               </div>
               <p className="text-lg font-bold text-blue-600">
                 {remaining === 0 ? 'Done!' : formatTime(estimated)}
@@ -93,8 +99,8 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
           </div>
 
           {autoSaveEnabled && lastSaved && (
-            <div className="flex items-center justify-center gap-2 pt-2 border-t">
-              <Save className="w-3 h-3 text-green-500" />
+            <div className="flex items-center justify-center gap-2 pt-2 border-t bg-muted/50 rounded-md p-2">
+              <Save className="w-3 h-3 text-green-600" />
               <span className="text-xs text-muted-foreground">
                 Auto-saved {formatLastSaved(lastSaved)}
               </span>

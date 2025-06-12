@@ -1,4 +1,3 @@
-
 import languageData from '@/data/iso639-1.json';
 import { TRANSLATED_LANGUAGES, getTranslatedLanguages, isLanguageTranslated } from '@/data/translatedLanguages';
 
@@ -104,7 +103,7 @@ class LanguageService {
     return allLanguages.filter(lang => !translatedLanguages.includes(lang.code));
   }
 
-  // Get popular languages excluding already translated ones
+  // Get popular languages excluding already translated ones, limited to 10 for display
   getPopularUntranslatedLanguages(): { code: string; name: string }[] {
     const translatedLanguages = this.getTranslatedLanguages();
     const popularLanguages = POPULAR_LANGUAGE_CODES
@@ -113,7 +112,8 @@ class LanguageService {
         code,
         name: this.getLanguageName(code)
       }))
-      .filter(lang => this.isValidLanguageCode(lang.code));
+      .filter(lang => this.isValidLanguageCode(lang.code))
+      .slice(0, 10); // Limit to 10 for display
     
     return popularLanguages;
   }
@@ -127,6 +127,14 @@ class LanguageService {
         isTranslated: this.isLanguageTranslated(code)
       }))
       .filter(lang => this.isValidLanguageCode(lang.code));
+  }
+
+  // Get all languages with translation status
+  getAllLanguagesWithStatus(): { code: string; name: string; isTranslated: boolean }[] {
+    return this.getAllSupportedLanguages().map(lang => ({
+      ...lang,
+      isTranslated: this.isLanguageTranslated(lang.code)
+    }));
   }
 }
 

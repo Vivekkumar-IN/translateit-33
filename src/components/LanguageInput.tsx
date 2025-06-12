@@ -23,7 +23,7 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
   // Get language categories synchronously (fast loading)
   const translatedLanguages = languageService.getTranslatedLanguageDetails();
   const popularUntranslatedLanguages = languageService.getPopularUntranslatedLanguages();
-  const allUntranslatedLanguages = languageService.getUntranslatedLanguages();
+  const allLanguagesWithStatus = languageService.getAllLanguagesWithStatus();
 
   useEffect(() => {
     if (languageCode.trim()) {
@@ -96,9 +96,6 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
         <div className="flex items-center gap-2">
           <CheckCircle className="w-4 h-4 text-green-600" />
           <p className="text-sm font-medium">Currently Translated Languages ({translatedLanguages.length}):</p>
-          <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
-            Can be enhanced
-          </Badge>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {translatedLanguages.map((lang) => (
@@ -148,23 +145,26 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Globe className="w-4 h-4 text-gray-600" />
-          <p className="text-sm font-medium">All Available Languages ({allUntranslatedLanguages.length}):</p>
+          <p className="text-sm font-medium">All Available Languages ({allLanguagesWithStatus.length}):</p>
         </div>
-        <div className="max-h-40 overflow-y-auto rounded-md border border-border bg-muted/30 p-3">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {allUntranslatedLanguages.map((lang) => (
-              <Badge
+        <div className="max-h-48 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {allLanguagesWithStatus.map((lang) => (
+              <div
                 key={lang.code}
-                variant={languageCode === lang.code ? "default" : "outline"}
-                className={`cursor-pointer justify-center py-1.5 text-xs transition-colors ${
+                className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-colors ${
                   languageCode === lang.code 
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                    : "hover:bg-accent hover:text-accent-foreground border-border dark:hover:bg-accent/50"
+                    ? "bg-primary text-primary-foreground" 
+                    : "hover:bg-accent hover:text-accent-foreground"
                 }`}
                 onClick={() => handleLanguageSelect(lang.code)}
               >
-                {lang.code.toUpperCase()} - {truncateName(lang.name, 7)}
-              </Badge>
+                {lang.isTranslated && (
+                  <CheckCircle className="w-3 h-3 text-green-600 flex-shrink-0" />
+                )}
+                <span className="text-xs font-mono">{lang.code.toUpperCase()}</span>
+                <span className="text-xs truncate">{lang.name}</span>
+              </div>
             ))}
           </div>
         </div>
