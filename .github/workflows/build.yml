@@ -1,24 +1,87 @@
-name: Deploy to GitHub Pages
+name:  Update and deploy
 
 on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '0 0 * * *'   # Optional: daily update at midnight
   workflow_dispatch:
 
 permissions:
-  actions: write
-  contents: read
+  contents: write
   pages: write
   id-token: write
+  actions: write
 
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: 🌍 Update ISO 639-1 data
+        run: |
+          mkdir -p src/data
+          curl -sSL "https://raw.githubusercontent.com/ihmpavel/all-iso-language-codes/master/data/en/639-1.json" -o src/data/iso639-1.json
+          echo "ISO 639-1 language data updated."
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Install dependencies
+        run: pip install pyyaml requests
+
+      - name: 🛠️ Update language JSONs from YAML
+        run: |
+          import os
+          import json
+          import yaml
+          import requests
+
+          with open("src/data/iso639-1.json") as f:
+              data = json.load(f)
+
+          os.makedirs("src/data/langs", exist_ok=True)
+
+          for key in data:
+              url = f"https://raw.githubusercontent.com/TheTeamVivek/YukkiMusic/master/strings/langs/{key}.yml"
+              res = requests.get(url)
+              if res.status_code == 200:
+                  try:
+                      yml_content = yaml.safe_load(res.text)
+                      with open(f"src/data/langs/{key}.json", "w", encoding="utf-8") as jf:
+                          json.dump(yml_content, jf, indent=4, ensure_ascii=False)
+                      print(f"Saved {key}.json")
+                  except Exception as e:
+                      print(f"Error in {key}.yml: {e}")
+                      raise e
+              else:
+                  print(f"{key}.yml not found, skipping.")
+
+        shell: python
+
+      - name: ✅ Commit updated data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update language JSONs"
+          commit_options: "--no-verify"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          commit_author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+
   build:
     runs-on: ubuntu-latest
+    needs: update-data
+
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -41,7 +104,6 @@ jobs:
 
       - name: 📄 Create 404 page for SPA routing
         run: |
-          # Create 404.html from index.html for GitHub Pages SPA routing
           cp dist/index.html dist/404.html
           echo "404.html created for GitHub Pages SPA routing"
 
@@ -51,17 +113,18 @@ jobs:
           path: ./dist
 
   deploy:
+    runs-on: ubuntu-latest
+    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: 🚀 Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - uses: Mattraks/delete-workflow-runs@v2
+      - name: 🧹 Clean old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
         with:
           keep_minimum_runs: 0
           retain_days: 0
