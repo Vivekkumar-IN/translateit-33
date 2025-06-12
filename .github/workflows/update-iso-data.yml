@@ -3,34 +3,25 @@ name: Update ISO Language Data
 
 on:
   schedule:
-    # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    - cron: '0 0 1 * *' # Run on the first day of each month
   workflow_dispatch: # Allow manual trigger
-
-permissions:
-  contents: write
-  actions: read
 
 jobs:
   update-iso-data:
     runs-on: ubuntu-latest
     steps:
-      - name: ⬇️ Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 📥 Download ISO language data
+      - name: Fetch ISO 639-1 data
         run: |
-          mkdir -p src/data/iso
-          
-          # Download the simplified ISO 639-1 data
-          curl -o src/data/iso/iso-639-1.json https://raw.githubusercontent.com/ihmpavel/all-iso-language-codes/master/data/en/639-1.json
+          mkdir -p src/data
+          curl -s https://raw.githubusercontent.com/ihmpavel/all-iso-language-codes/master/data/en/639-1.json > src/data/iso639-1.json
+          echo "ISO language data updated successfully"
 
-      - name: 📝 Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Update ISO language data - $(date '+%Y-%m-%d')"
-          commit_options: "--no-verify"
-          repository: .
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
-          commit_author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+      - name: Commit and push if changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add src/data/iso639-1.json
+          git diff --staged --quiet || (git commit -m "Update ISO language data" && git push)

@@ -5,9 +5,21 @@ class LanguageService {
   constructor() {
     try {
       // Import the simplified ISO 639-1 data
-      this.languageNames = require('@/data/iso/iso-639-1.json');
+      this.languageNames = require('@/data/iso639-1.json');
     } catch (error) {
       console.warn('Failed to load ISO language data');
+      // Provide a minimal fallback for critical languages
+      this.languageNames = {
+        'en': 'English',
+        'hi': 'Hindi',
+        'es': 'Spanish',
+        'fr': 'French',
+        'de': 'German',
+        'ja': 'Japanese',
+        'zh': 'Chinese',
+        'ru': 'Russian',
+        'ar': 'Arabic'
+      };
     }
   }
 
