@@ -41,11 +41,11 @@ jobs:
           VITE_TELEGRAM_CHAT_ID: ${{ secrets.VITE_TELEGRAM_CHAT_ID }}
           VITE_TELEGRAM_BOT_BASE: ${{ secrets.VITE_TELEGRAM_BOT_BASE }}
 
-      - name: 📄 Create 404 page for SPA routing
-        run: |
+     # - name: 📄 Create 404 page for SPA routing
+      #  run: |
           # Create 404.html from index.html for GitHub Pages SPA routing
-          cp dist/index.html dist/404.html
-          echo "404.html created for GitHub Pages SPA routing"
+        #  cp dist/index.html dist/404.html
+       #   echo "404.html created for GitHub Pages SPA routing"
 
       - name: 📤 Upload artifact
         uses: actions/upload-pages-artifact@v3
