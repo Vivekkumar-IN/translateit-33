@@ -35,8 +35,6 @@ const YamlTranslator = () => {
     setCurrentIndex,
     userLang,
     setUserLang,
-    username,
-    setUsername,
     loading,
     setLoading,
     existingTranslations,
@@ -57,7 +55,6 @@ const YamlTranslator = () => {
   } = useTranslationFlow({
     setLoading,
     setUserLang,
-    setUsername,
     setYamlData,
     setAllKeys,
     setTranslations,
@@ -78,13 +75,12 @@ const YamlTranslator = () => {
   const { toast } = useToast();
 
   // Handle URL parameters and check for saved translations
-  const handleStartTranslationWithDialog = async (data: { languageCode: string; username?: string }) => {
+  const handleStartTranslationWithDialog = async (data: { languageCode: string }) => {
     const result = await handleStartTranslation(data);
     
     if (result.showDialog) {
       setPendingLanguageCode(result.languageCode);
       setSavedTranslationData(result.savedData);
-      setUsername(result.username);
       setShowContinueDialog(true);
     }
   };
@@ -116,7 +112,7 @@ const YamlTranslator = () => {
   const handleContinueTranslation = () => {
     setShowContinueDialog(false);
     if (savedTranslationData) {
-      proceedWithTranslation(pendingLanguageCode, savedTranslationData, username);
+      proceedWithTranslation(pendingLanguageCode, savedTranslationData);
       toast({
         title: "Previous translations loaded successfully!",
         description: `Loaded ${Object.keys(savedTranslationData.translations).length} previous translations`,
@@ -127,7 +123,7 @@ const YamlTranslator = () => {
   const handleRestartTranslation = () => {
     setShowContinueDialog(false);
     storageService.clearTranslations(pendingLanguageCode);
-    proceedWithTranslation(pendingLanguageCode, undefined, username);
+    proceedWithTranslation(pendingLanguageCode);
   };
 
   const handleCancelDialog = () => {
@@ -189,7 +185,7 @@ const YamlTranslator = () => {
   const handleSendToTelegram = async () => {
     setLoading(true);
     try {
-      await telegramService.sendTranslations(translations, userLang, username);
+      await telegramService.sendTranslations(translations, userLang);
       toast({
         title: "Sent to Telegram!",
         description: "Your translations have been sent successfully",
@@ -263,7 +259,7 @@ const YamlTranslator = () => {
         {/* Enhanced Translation Warning */}
         {CONFIG.TRANSLATION_WARNING.enabled && (
           <Alert className="relative overflow-hidden border-0 bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 dark:from-amber-950/30 dark:via-orange-950/30 dark:to-red-950/30 shadow-lg">
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-400/10 via-orange-400/10 to-red-400/10 dark:from-amber-400/5 dark:via-orange-400/5 dark:to-red-400/5" />
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-400/10 via-orange-400/10 to-red-400/10" />
             <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-amber-500 via-orange-500 to-red-500" />
             <div className="relative flex items-start gap-3 p-4">
               <div className="flex-shrink-0 mt-0.5">

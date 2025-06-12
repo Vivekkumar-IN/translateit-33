@@ -13,7 +13,7 @@ interface LanguageSelectionProps {
   showExitDialog: boolean;
   pendingLanguageCode: string;
   savedTranslationData: TranslationData | null;
-  onStartTranslation: (languageCode: string) => void;
+  onStartTranslation: (data: { languageCode: string }) => void;
   onContinueTranslation: () => void;
   onRestartTranslation: () => void;
   onCancelDialog: () => void;

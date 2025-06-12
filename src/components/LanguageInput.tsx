@@ -5,11 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Lightbulb, User, Github } from 'lucide-react';
-import { languageDetectionService } from '../services/languageDetectionService';
+import { Loader2, Lightbulb, AlertTriangle, CheckCircle } from 'lucide-react';
+import { enhancedLanguageService } from '../services/enhancedLanguageService';
 
 interface LanguageInputProps {
-  onStart: (data: { languageCode: string; username?: string }) => void;
+  onStart: (data: { languageCode: string }) => void;
   loading: boolean;
 }
 
@@ -30,23 +30,35 @@ const popularLanguages = [
 
 const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
   const [languageCode, setLanguageCode] = useState('');
-  const [username, setUsername] = useState('');
   const [detectedLanguage, setDetectedLanguage] = useState('');
+  const [validation, setValidation] = useState<{
+    isValid: boolean;
+    isDeprecated: boolean;
+    suggestion?: string;
+    name?: string;
+  } | null>(null);
 
   useEffect(() => {
-    // Auto-detect user's language
-    const detected = languageDetectionService.detectUserLanguage();
+    const detected = enhancedLanguageService.detectUserLanguage();
     if (detected) {
       setDetectedLanguage(detected);
     }
   }, []);
 
+  useEffect(() => {
+    if (languageCode.trim()) {
+      const result = enhancedLanguageService.validateLanguageCode(languageCode.trim());
+      setValidation(result);
+    } else {
+      setValidation(null);
+    }
+  }, [languageCode]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (languageCode.trim()) {
+    if (languageCode.trim() && validation?.isValid) {
       onStart({ 
-        languageCode: languageCode.trim().toLowerCase(),
-        username: username.trim() || undefined
+        languageCode: languageCode.trim().toLowerCase()
       });
     }
   };
@@ -59,10 +71,10 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
     setLanguageCode(detectedLanguage);
   };
 
-  const validateUsername = (value: string) => {
-    if (!value.trim()) return true; // Optional field
-    // Basic validation for GitHub/Telegram username
-    return /^[a-zA-Z0-9_-]+$/.test(value.trim());
+  const useSuggestion = () => {
+    if (validation?.suggestion) {
+      setLanguageCode(validation.suggestion);
+    }
   };
 
   return (
@@ -74,7 +86,7 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
           <AlertDescription className="text-sm">
             <div className="flex items-center justify-between">
               <span>
-                Detected language: <strong>{languageDetectionService.getLanguageName(detectedLanguage)}</strong> ({detectedLanguage})
+                Detected language: <strong>{enhancedLanguageService.getLanguageName(detectedLanguage)}</strong> ({detectedLanguage})
               </span>
               <Button
                 type="button"
@@ -101,32 +113,54 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
           className="text-center"
           disabled={loading}
         />
+        
+        {/* Validation feedback */}
+        {validation && (
+          <div className="space-y-2">
+            {validation.isValid ? (
+              <Alert className="border-green-200 bg-green-50 dark:bg-green-950/30">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <AlertDescription className="text-sm text-green-800 dark:text-green-200">
+                  Valid language: <strong>{validation.name}</strong>
+                </AlertDescription>
+              </Alert>
+            ) : validation.isDeprecated ? (
+              <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/30">
+                <AlertTriangle className="w-4 h-4 text-orange-600" />
+                <AlertDescription className="text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-orange-800 dark:text-orange-200">
+                      Deprecated code. {validation.suggestion && (
+                        <>Use <strong>{validation.suggestion}</strong> instead.</>
+                      )}
+                    </span>
+                    {validation.suggestion && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={useSuggestion}
+                        className="ml-2"
+                      >
+                        Use {validation.suggestion}
+                      </Button>
+                    )}
+                  </div>
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <Alert className="border-red-200 bg-red-50 dark:bg-red-950/30">
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+                <AlertDescription className="text-sm text-red-800 dark:text-red-200">
+                  Invalid language code. Please use a valid ISO 639-1 code.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        )}
+        
         <p className="text-xs text-muted-foreground text-center">
           Use 2-letter ISO codes like 'hi' for Hindi, 'fr' for French, etc.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="username" className="flex items-center gap-2">
-          <User className="w-4 h-4" />
-          GitHub/Telegram Username (Optional)
-        </Label>
-        <Input
-          id="username"
-          type="text"
-          placeholder="e.g., your_username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          disabled={loading}
-          className={!validateUsername(username) ? "border-red-500" : ""}
-        />
-        {username && !validateUsername(username) && (
-          <p className="text-xs text-red-500">
-            Username can only contain letters, numbers, hyphens, and underscores
-          </p>
-        )}
-        <p className="text-xs text-muted-foreground">
-          Optional: Your GitHub or Telegram username for attribution
         </p>
       </div>
 
@@ -152,7 +186,7 @@ const LanguageInput: React.FC<LanguageInputProps> = ({ onStart, loading }) => {
 
       <Button 
         type="submit" 
-        disabled={!languageCode.trim() || loading || !validateUsername(username)} 
+        disabled={!languageCode.trim() || loading || !validation?.isValid} 
         className="w-full"
       >
         {loading ? (

@@ -1,32 +1,28 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'react-router-dom';
 
 export const useBackButtonHandler = () => {
-  const [backButtonCount, setBackButtonCount] = useState(0);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const { toast } = useToast();
+  const location = useLocation();
 
-  // Handle browser back button with double-tap confirmation
+  // Only handle back button on main page
   useEffect(() => {
+    // Only enable on root path
+    if (location.pathname !== '/') {
+      return;
+    }
+
     const handlePopState = (event: PopStateEvent) => {
       event.preventDefault();
       
-      if (backButtonCount === 0) {
-        setBackButtonCount(1);
-        toast({
-          title: "Press back again to exit",
-          description: "Tap back button once more to close the application",
-        });
-        
-        // Reset count after 2 seconds
-        setTimeout(() => setBackButtonCount(0), 2000);
-        
-        // Push state back to prevent navigation
-        window.history.pushState(null, '', window.location.href);
-      } else {
-        setShowExitDialog(true);
-      }
+      // Show popup immediately on first back press on main page
+      setShowExitDialog(true);
+      
+      // Push state back to prevent navigation
+      window.history.pushState(null, '', window.location.href);
     };
 
     // Push initial state to prevent immediate back navigation
@@ -36,7 +32,7 @@ export const useBackButtonHandler = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [backButtonCount, toast]);
+  }, [location.pathname, toast]);
 
   const handleExitConfirm = () => {
     window.close();
@@ -44,7 +40,6 @@ export const useBackButtonHandler = () => {
 
   const handleExitCancel = () => {
     setShowExitDialog(false);
-    setBackButtonCount(0);
   };
 
   return {

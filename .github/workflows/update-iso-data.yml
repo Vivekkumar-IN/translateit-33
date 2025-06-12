@@ -1,0 +1,43 @@
+
+name: Update ISO Language Data
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  update-iso-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: 📥 Download ISO language data
+        run: |
+          mkdir -p src/data/iso
+          
+          # Download all ISO 639 data files
+          curl -o src/data/iso/iso-639.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639.json
+          curl -o src/data/iso/iso-639_scope.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_scope.json
+          curl -o src/data/iso/iso-639_type.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_type.json
+          curl -o src/data/iso/iso-639_deprecated.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_deprecated.json
+          curl -o src/data/iso/iso-639_macro.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_macro.json
+          curl -o src/data/iso/iso-639_ref_name.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_ref_name.json
+          curl -o src/data/iso/iso-639_other_names.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_other_names.json
+          curl -o src/data/iso/iso-639_langs.json https://raw.githubusercontent.com/LBeaudoux/iso639/master/iso639/data/iso-639_langs.json
+
+      - name: 📝 Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update ISO language data - $(date '+%Y-%m-%d')"
+          commit_options: "--no-verify"
+          repository: .
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          commit_author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
