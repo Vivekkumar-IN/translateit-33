@@ -14,7 +14,7 @@ export const CONFIG = {
     // For GitHub Pages: "/translateit/"
     // For local development or root deployment: "/"
     // Can be overridden by VITE_BASE_PATH environment variable
-    BASE_PATH: (import.meta as any).env?.VITE_BASE_PATH || "/translateit/",
+    BASE_PATH: (import.meta as any).env?.VITE_BASE_PATH || "/",
   },
   
   // GitHub Repository Links
